@@ -122,12 +122,6 @@ systemctl stop service     # Stop service
 systemctl restart service  # Restart service
 ```
 
-### Text Editors
-```bash
-nano file             # Nano editor
-vim file              # Vim editor
-```
-
 ---
 
 # 3. Cloud Computing - Azure
@@ -265,14 +259,6 @@ Ansible is an open-source configuration management tool that automates:
 - Application deployment
 - Configuration management
 
-## Ansible Architecture
-
-- **Control Node**: The machine running Ansible
-- **Managed Nodes**: Servers managed by Ansible
-- **Inventory**: List of managed nodes
-- **Playbooks**: Ansible configuration files (YAML)
-- **Modules**: Pre-built automation scripts
-
 ## Installation
 
 ```bash
@@ -394,7 +380,6 @@ sudo apt upgrade -y
 
 ## Installation on Ubuntu
 
-### Method 1: From Repository
 ```bash
 # Add Jenkins repository
 wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc
@@ -411,33 +396,18 @@ sudo systemctl enable jenkins
 
 # Check status
 sudo systemctl status jenkins
-```
 
-### Method 2: Using Installation Script
-```bash
-cd experiment-05-jenkins
-chmod +x install_jenkins.sh
-sudo ./install_jenkins.sh
+# Get initial password
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ```
 
 ## Access Jenkins
 - URL: http://localhost:8080
-- Get initial password: `sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
-
-## First-Time Setup
-1. Enter admin password
-2. Install suggested plugins
-3. Create admin user
-4. Set Jenkins URL
-5. Start using Jenkins
+- Initial password: `sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
 
 ---
 
 # 8. Jenkins Pipeline
-
-## What is Jenkins Pipeline?
-
-Jenkins Pipeline is a suite of plugins for implementing continuous delivery pipelines.
 
 ## Jenkinsfile Example
 
@@ -492,28 +462,9 @@ pipeline {
 }
 ```
 
-## Creating Jenkins Job
-
-1. Dashboard → New Item
-2. Enter name → Pipeline
-3. Definition: Pipeline script from SCM
-4. SCM: Git
-5. Repository URL: your-repo-url
-6. Script Path: Jenkinsfile
-7. Save → Build Now
-
 ---
 
 # 9. Azure DevOps Pipelines
-
-## Azure DevOps Overview
-
-Microsoft's complete DevOps solution with:
-- **Boards**: Project management
-- **Repos**: Git hosting
-- **Pipelines**: CI/CD
-- **Test Plans**: Testing
-- **Artifacts**: Package management
 
 ## Azure Pipeline Example
 
@@ -558,38 +509,83 @@ stages:
                     package: '$(Pipeline.Workspace)/drop/*.jar'
 ```
 
-## Creating Pipeline in Azure DevOps
-
-1. Go to https://dev.azure.com
-2. Create Organization
-3. Create Project
-4. Go to Pipelines → New Pipeline
-5. Select repository
-6. Select YAML file
-7. Run pipeline
-
 ---
 
 # 10. Source Code Projects
 
-## Project 1: Maven - Student Management System
+## Project 1: Maven - Student & Product Management System
 
 **Location:** `experiment-02-maven/`
 
 ### Build & Run
 ```bash
+# Clone repository
+git clone https://github.com/your-repo/azure-poc.git
+cd azure-poc
+
+# Build project
 cd experiment-02-maven
 mvn clean package
+
+# Run application
 java -jar target/maven-demo-app-1.0.0.jar
 ```
 
-### API Endpoints
-- `/api/students` - Student CRUD
-- `/api/products` - Product CRUD
+### Run with Docker
+```bash
+cd experiment-02-maven
+docker build -t maven-demo-app:latest .
+docker run -p 8080:8080 maven-demo-app:latest
+```
+
+### API Endpoints - Students
+```bash
+# Get all students
+curl http://localhost:8080/api/students
+
+# Get student by ID
+curl http://localhost:8080/api/students/1
+
+# Create student
+curl -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","email":"john@email.com","course":"Computer Science","age":20,"grade":"A"}'
+
+# Update student
+curl -X PUT http://localhost:8080/api/students/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Updated","email":"john@email.com","course":"IT","age":21,"grade":"A+"}'
+
+# Delete student
+curl -X DELETE http://localhost:8080/api/students/1
+
+# Search students
+curl http://localhost:8080/api/students/search?query=John
+```
+
+### API Endpoints - Products
+```bash
+# Get all products
+curl http://localhost:8080/api/products
+
+# Get product by ID
+curl http://localhost:8080/api/products/1
+
+# Create product
+curl -X POST http://localhost:8080/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Tablet","category":"Electronics","price":499.99,"stock":30}'
+
+# Update product stock
+curl -X PUT http://localhost:8080/api/products/1/stock?quantity=75
+
+# Get products by category
+curl http://localhost:8080/api/products/category/Electronics
+```
 
 ---
 
-## Project 2: Gradle - Employee Management System
+## Project 2: Gradle - Employee & Order Management System
 
 **Location:** `experiment-03-gradle/`
 
@@ -601,44 +597,180 @@ chmod +x gradlew
 java -jar build/libs/gradle-demo-app-1.0.0.jar
 ```
 
-### API Endpoints
-- `/api/employees` - Employee CRUD
-- `/api/orders` - Order CRUD
+### Run with Docker
+```bash
+cd experiment-03-gradle
+docker build -t gradle-demo-app:latest .
+docker run -p 8080:8080 gradle-demo-app:latest
+```
+
+### API Endpoints - Employees
+```bash
+# Get all employees
+curl http://localhost:8080/api/employees
+
+# Get employee by ID
+curl http://localhost:8080/api/employees/1
+
+# Create employee
+curl -X POST http://localhost:8080/api/employees \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Jane Smith","email":"jane@company.com","department":"IT","salary":70000,"designation":"Developer"}'
+
+# Update employee
+curl -X PUT http://localhost:8080/api/employees/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Jane Updated","email":"jane@company.com","department":"Engineering","salary":80000,"designation":"Tech Lead"}'
+
+# Delete employee
+curl -X DELETE http://localhost:8080/api/employees/1
+
+# Get employees by department
+curl http://localhost:8080/api/employees/department/Engineering
+
+# Search employees
+curl http://localhost:8080/api/employees/search?query=Alice
+```
+
+### API Endpoints - Orders
+```bash
+# Get all orders
+curl http://localhost:8080/api/orders
+
+# Get order by ID
+curl http://localhost:8080/api/orders/1
+
+# Create order
+curl -X POST http://localhost:8080/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"customerName":"New Customer","product":"Tablet","quantity":1,"totalPrice":499.99,"status":"Processing","orderDate":"2026-04-07"}'
+
+# Update order status
+curl -X PUT "http://localhost:8080/api/orders/1/status?status=Delivered"
+
+# Get orders by status
+curl http://localhost:8080/api/orders/status/Processing
+```
 
 ---
 
 ## Accessing Applications
 
-| Application | URL |
-|------------|-----|
-| Web App | http://your-ip:8080 |
-| Swagger UI | http://your-ip:8080/swagger-ui.html |
-| API Docs | http://your-ip:8080/api-docs |
+| Service | URL |
+|---------|-----|
+| Web App | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| API Docs | http://localhost:8080/api-docs |
+| Health Check | http://localhost:8080/actuator/health |
 
 ---
 
-## Quick Start Commands
+## Quick Start - Complete Setup
 
+### Step 1: Clone Repository
 ```bash
-# Install all tools
-cd experiment-12-complete
-chmod +x master_setup.sh
-sudo ./master_setup.sh
+git clone https://github.com/your-repo/azure-poc.git
+cd azure-poc
+```
 
-# Build Maven project
+### Step 2: Auto Setup (Installs All Tools)
+```bash
+chmod +x auto_setup.sh
+sudo ./auto_setup.sh
+```
+
+### Step 3: Build and Run Maven Project
+```bash
 cd experiment-02-maven
 mvn clean package
 java -jar target/maven-demo-app-1.0.0.jar
+```
 
-# Build Gradle project
+### Step 4: Build and Run Gradle Project
+```bash
 cd experiment-03-gradle
+chmod +x gradlew
 ./gradlew clean build
 java -jar build/libs/gradle-demo-app-1.0.0.jar
+```
 
-# Run Docker
+### Step 5: Access Swagger UI
+```
+http://your-server-ip:8080/swagger-ui.html
+```
+
+---
+
+## Jenkins Pipeline Commands
+
+### Build Jenkins Job from Command Line
+```bash
+# Check Jenkins status
+sudo systemctl status jenkins
+
+# Restart Jenkins
+sudo systemctl restart jenkins
+
+# Get Jenkins logs
+sudo journalctl -u jenkins -n 50
+```
+
+---
+
+## Docker Commands
+
+### Build Images
+```bash
+# Maven project
 cd experiment-02-maven
-docker build -t maven-app:latest .
-docker run -p 8080:8080 maven-app:latest
+docker build -t maven-demo-app:latest .
+
+# Gradle project
+cd experiment-03-gradle
+docker build -t gradle-demo-app:latest .
+```
+
+### Run Containers
+```bash
+# Maven container
+docker run -d -p 8080:8080 --name maven-app maven-demo-app:latest
+
+# Gradle container
+docker run -d -p 8081:8080 --name gradle-app gradle-demo-app:latest
+```
+
+### Manage Containers
+```bash
+# List running containers
+docker ps
+
+# Stop container
+docker stop maven-app
+
+# Remove container
+docker rm maven-app
+
+# View logs
+docker logs maven-app
+```
+
+---
+
+## Azure DevOps Pipeline Commands
+
+### Create Service Connection
+1. Go to Azure DevOps → Project Settings
+2. Go to Service Connections
+3. Create New → Azure Resource Manager
+4. Select subscription and create
+
+### Run Pipeline from CLI
+```bash
+# Install Azure DevOps CLI
+az extension add --name azure-devops
+
+# Run pipeline
+az pipelines run --name "My Pipeline"
 ```
 
 ---
@@ -655,3 +787,16 @@ docker run -p 8080:8080 maven-app:latest
 - Write-up: 20%
 - Conduction: 60%
 - Viva: 20%
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Maven build fails | Run `mvn clean` first |
+| Gradle build fails | Run `./gradlew clean` |
+| Port 8080 in use | Kill process: `sudo kill $(lsof -t -i:8080)` |
+| Jenkins won't start | Check logs: `sudo journalctl -u jenkins` |
+| Ansible ping fails | Check inventory file |
+| Azure pipeline fails | Check service connection |
