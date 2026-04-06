@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'application'
     id 'org.springframework.boot' version '3.2.0'
     id 'io.spring.dependency-management' version '1.1.4'
 }
@@ -9,9 +8,8 @@ group = 'com.devops.gradle'
 version = '1.0.0'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -27,12 +25,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-application {
-    mainClass = 'com.devops.gradle.GradleDemoApplication'
-}
-
 bootJar {
-    mainClass = 'com.devops.gradle.GradleDemoApplication'
+    archiveFileName = 'gradle-demo-app-1.0.0.jar'
 }
 
 test {
