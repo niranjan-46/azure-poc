@@ -9,12 +9,9 @@
 #  - Installs Jenkins
 #  - Installs Ansible
 #  - Installs Docker
-#  - Creates all necessary directories
-#  - Sets up Maven project
-#  - Sets up Gradle project
-#  - Configures Ansible
-#  - Creates complete Jenkins pipeline
-#  - Creates complete Azure DevOps pipeline
+#  - Fixes Gradle wrapper
+#  - Builds Maven project
+#  - Builds Gradle project
 # ========================================================================
 #  Usage: chmod +x auto_setup.sh && sudo ./auto_setup.sh
 # ========================================================================
@@ -91,10 +88,10 @@ apt-get install -y maven
 log "Maven installed"
 
 # ========================================================================
-# Step 4: Install Gradle
+# Step 4: Install Gradle (System)
 # ========================================================================
 echo ""
-info "Step 4: Installing Gradle 8.6..."
+info "Step 4: Installing Gradle 8.6 (system)..."
 GRADLE_VERSION=8.6
 wget -q https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip
 unzip -q /tmp/gradle.zip -d /opt/
@@ -143,7 +140,6 @@ info "Step 8: Installing Docker..."
 apt-get install -y docker.io
 systemctl start docker
 systemctl enable docker
-usermod -aG docker ubuntu
 log "Docker installed"
 
 # ========================================================================
@@ -164,52 +160,77 @@ source /etc/profile.d/devops.sh
 log "Environment variables set"
 
 # ========================================================================
-# Step 10: Build Maven Project
+# Step 10: Fix Gradle Wrapper (Download jar if missing)
 # ========================================================================
 echo ""
-info "Step 10: Building Maven project..."
+info "Step 10: Fixing Gradle wrapper..."
+
+cd "$SCRIPT_DIR/experiment-03-gradle"
+
+# Check if gradle-wrapper.jar exists
+if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+    info "Downloading gradle-wrapper.jar..."
+    wget -q -O gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar
+    log "Gradle wrapper jar downloaded"
+else
+    log "Gradle wrapper jar already exists"
+fi
+
+chmod +x gradlew
+log "Gradle wrapper fixed"
+
+# ========================================================================
+# Step 11: Build Maven Project
+# ========================================================================
+echo ""
+info "Step 11: Building Maven project..."
 cd "$SCRIPT_DIR/experiment-02-maven"
 mvn clean package -DskipTests
 log "Maven project built"
 
 # ========================================================================
-# Step 11: Build Gradle Project
+# Step 12: Build Gradle Project (using system gradle)
 # ========================================================================
 echo ""
-info "Step 11: Building Gradle project..."
+info "Step 12: Building Gradle project..."
 cd "$SCRIPT_DIR/experiment-03-gradle"
-chmod +x gradlew
-./gradlew clean build -x test
+
+# Try gradlew first, fallback to system gradle
+if [ -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+    ./gradlew clean build -x test
+else
+    gradle clean build -x test
+fi
 log "Gradle project built"
 
 # ========================================================================
-# Step 12: Configure Ansible
+# Step 13: Configure Ansible
 # ========================================================================
 echo ""
-info "Step 12: Configuring Ansible..."
+info "Step 13: Configuring Ansible..."
 cd "$SCRIPT_DIR/experiment-07-ansible"
 chmod +x *.sh 2>/dev/null || true
 log "Ansible configured"
 
 # ========================================================================
-# Step 13: Make All Scripts Executable
+# Step 14: Make All Scripts Executable
 # ========================================================================
 echo ""
-info "Step 13: Making all scripts executable..."
+info "Step 14: Making all scripts executable..."
 cd "$SCRIPT_DIR"
 find . -name "*.sh" -exec chmod +x {} \;
 log "All scripts made executable"
 
 # ========================================================================
-# Step 14: Build Docker Images
+# Step 15: Build Docker Images (Optional)
 # ========================================================================
 echo ""
-info "Step 14: Building Docker images..."
+info "Step 15: Building Docker images..."
 cd "$SCRIPT_DIR/experiment-02-maven"
-docker build -t devops-maven-app:latest . 2>/dev/null || warn "Docker build skipped (no JAR yet)"
+docker build -t maven-demo-app:latest . 2>/dev/null || warn "Docker build skipped"
 cd "$SCRIPT_DIR/experiment-03-gradle"
-docker build -t devops-gradle-app:latest . 2>/dev/null || warn "Docker build skipped (no JAR yet)"
-log "Docker images built"
+docker build -t gradle-demo-app:latest . 2>/dev/null || warn "Docker build skipped"
+log "Docker images ready"
 
 # ========================================================================
 # Final Summary
@@ -230,14 +251,12 @@ echo "  Jenkins:  http://localhost:8080"
 echo "  Ansible:  $(ansible --version | head -1)"
 echo "  Docker:   $(docker --version)"
 echo ""
-echo -e "${YELLOW}Quick Commands:${NC}"
-echo "  Maven:    cd experiment-02-maven && mvn clean package"
-echo "  Gradle:   cd experiment-03-gradle && ./gradlew build"
-echo "  Jenkins:  http://localhost:8080"
-echo "  Ansible:  cd experiment-07-ansible && ansible-playbook -i hosts.ini setup_webserver.yml"
+echo -e "${YELLOW}Run Applications:${NC}"
+echo "  Maven:    cd experiment-02-maven && java -jar target/maven-demo-app-1.0.0.jar"
+echo "  Gradle:   cd experiment-03-gradle && java -jar build/libs/gradle-demo-app-1.0.0.jar"
 echo ""
-echo -e "${YELLOW}Launcher:${NC}"
-echo "  ./devops-launcher.sh"
+echo -e "${YELLOW}Access Swagger UI:${NC}"
+echo "  http://localhost:8080/swagger-ui.html"
 echo ""
 echo -e "${GREEN}Happy Learning DevOps!${NC}"
 echo ""

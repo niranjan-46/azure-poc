@@ -673,7 +673,7 @@ git clone https://github.com/your-repo/azure-poc.git
 cd azure-poc
 ```
 
-### Step 2: Auto Setup (Installs All Tools)
+### Step 2: Auto Setup (Installs All Tools + Fixes Gradle Wrapper)
 ```bash
 chmod +x auto_setup.sh
 sudo ./auto_setup.sh
@@ -686,11 +686,25 @@ mvn clean package
 java -jar target/maven-demo-app-1.0.0.jar
 ```
 
-### Step 4: Build and Run Gradle Project
+### Step 4: Build and Run Gradle Project (Auto-fixed)
 ```bash
 cd experiment-03-gradle
 chmod +x gradlew
 ./gradlew clean build
+java -jar build/libs/gradle-demo-app-1.0.0.jar
+```
+
+### If Gradle Wrapper Issue Occurs:
+```bash
+cd experiment-03-gradle
+
+# Download wrapper jar
+wget -O gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar
+
+# Or use system gradle as fallback
+gradle clean build
+
+# Then run
 java -jar build/libs/gradle-demo-app-1.0.0.jar
 ```
 

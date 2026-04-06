@@ -6,10 +6,12 @@ dist/
 *.war
 *.ear
 
-# Gradle
+# Gradle - keep wrapper files
 .gradle/
 gradle-app.setting
-!gradle-wrapper.jar
+!gradle/wrapper/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
 # Maven
 .m2/
