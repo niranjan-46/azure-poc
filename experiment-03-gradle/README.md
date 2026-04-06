@@ -14,20 +14,23 @@ A company needs to manage employee records and an e-commerce platform needs orde
 - ✅ Swagger UI Documentation
 - ✅ REST API
 
-## Files
-- `build.gradle` — Gradle configuration
-- `src/main/java/com/devops/gradle/GradleDemoApplication.java` — Main Spring Boot app
-- `src/main/java/com/devops/gradle/model/Employee.java` — Employee model
-- `src/main/java/com/devops/gradle/controller/EmployeeController.java` — Employee API
-- `src/main/java/com/devops/gradle/controller/OrderController.java` — Order API
-
 ## Build & Run
+
 ```bash
 cd experiment-03-gradle
 chmod +x gradlew
 ./gradlew clean build
 java -jar build/libs/gradle-demo-app-1.0.0.jar
 ```
+
+## Access URLs
+
+| Service | URL |
+|---------|-----|
+| Web App | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| API Docs | http://localhost:8080/api-docs |
+| Health | http://localhost:8080/actuator/health |
 
 ## API Endpoints
 
@@ -51,20 +54,8 @@ java -jar build/libs/gradle-demo-app-1.0.0.jar
 | PUT | `/api/orders/{id}/status?status=Shipped` | Update status |
 | GET | `/api/orders/status/{status}` | Get by status |
 
-## Sample Data
-
-### Employees
-- Alice Johnson - Engineering - Senior Developer - $75,000
-- Bob Williams - Marketing - Marketing Manager - $55,000
-- Carol Davis - HR - HR Manager - $65,000
-- Daniel Brown - Finance - Financial Analyst - $80,000
-
-### Orders
-- Emma Wilson - Laptop (2) - $1999.98 - Delivered
-- Frank Miller - Smartphone (1) - $699.99 - Shipped
-- Grace Lee - Headphones (3) - $149.97 - Processing
-
 ## Test with curl
+
 ```bash
 # Get all employees
 curl http://localhost:8080/api/employees
@@ -77,26 +68,55 @@ curl -X POST http://localhost:8080/api/employees \
   -H "Content-Type: application/json" \
   -d '{"name":"New Employee","email":"new@company.com","department":"IT","salary":60000,"designation":"Developer"}'
 
+# Update employee
+curl -X PUT http://localhost:8080/api/employees/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alice Updated","email":"alice@company.com","Engineering","salary":80000,"designation":"Tech Lead"}'
+
+# Delete employee
+curl -X DELETE http://localhost:8080/api/employees/1
+
 # Get employees by department
 curl http://localhost:8080/api/employees/department/Engineering
+
+# Search employees
+curl http://localhost:8080/api/employees/search?query=Alice
 
 # Get all orders
 curl http://localhost:8080/api/orders
 
+# Get order by ID
+curl http://localhost:8080/api/orders/1
+
+# Create new order
+curl -X POST http://localhost:8080/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"customerName":"New Customer","product":"Tablet","quantity":1,"totalPrice":499.99,"status":"Processing","orderDate":"2026-04-07"}'
+
 # Update order status
 curl -X PUT "http://localhost:8080/api/orders/1/status?status=Delivered"
+
+# Get orders by status
+curl http://localhost:8080/api/orders/status/Processing
 ```
 
-## Access
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- API Docs: http://localhost:8080/api-docs
-- Health: http://localhost:8080/actuator/health
+## Docker
 
-## Gradle vs Maven Comparison
+```bash
+# Build
+cd experiment-03-gradle
+docker build -t gradle-demo-app:latest .
 
-| Feature | Maven | Gradle |
-|---------|-------|--------|
-| Config File | pom.xml | build.gradle |
-| Language | XML | Groovy DSL |
-| Build Speed | Slower | Faster (cache) |
-| This Project | Student/Product System | Employee/Order System |
+# Run
+docker run -p 8080:8080 gradle-demo-app:latest
+```
+
+## Gradle vs Maven Commands
+
+| Action | Maven | Gradle |
+|--------|-------|--------|
+| Clean | `mvn clean` | `./gradlew clean` |
+| Build | `mvn package` | `./gradlew build` |
+| Run | `java -jar target/*.jar` | `java -jar build/libs/*.jar` |
+| Tests | `mvn test` | `./gradlew test` |
+| Clean Build | `mvn clean package` | `./gradlew clean build` |

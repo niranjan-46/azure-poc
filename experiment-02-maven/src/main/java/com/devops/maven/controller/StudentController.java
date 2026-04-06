@@ -36,7 +36,7 @@ public class StudentController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get student by ID", description = "Returns a single student by ID")
-    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
+    public ResponseEntity<Student> getStudentById(@PathVariable("id") Long id) {
         Student student = studentMap.get(id);
         if (student != null) {
             return ResponseEntity.ok(student);
@@ -55,7 +55,7 @@ public class StudentController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update student", description = "Updates an existing student")
-    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student student) {
+    public ResponseEntity<Student> updateStudent(@PathVariable("id") Long id, @RequestBody Student student) {
         if (studentMap.containsKey(id)) {
             student.setId(id);
             studentMap.put(id, student);
@@ -66,7 +66,7 @@ public class StudentController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete student", description = "Removes a student from the system")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteStudent(@PathVariable("id") Long id) {
         if (studentMap.containsKey(id)) {
             studentMap.remove(id);
             return ResponseEntity.ok().build();
@@ -76,7 +76,7 @@ public class StudentController {
 
     @GetMapping("/search")
     @Operation(summary = "Search students", description = "Search students by name or course")
-    public List<Student> searchStudents(@RequestParam String query) {
+    public List<Student> searchStudents(@RequestParam("query") String query) {
         String lowerQuery = query.toLowerCase();
         return studentMap.values().stream()
             .filter(s -> s.getName().toLowerCase().contains(lowerQuery) || 

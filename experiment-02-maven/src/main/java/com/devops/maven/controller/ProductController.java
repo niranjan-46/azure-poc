@@ -60,7 +60,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get product by ID", description = "Returns product details")
-    public ResponseEntity<Map<String, Object>> getProduct(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getProduct(@PathVariable("id") Long id) {
         if (productMap.containsKey(id)) {
             return ResponseEntity.ok(productMap.get(id));
         }
@@ -79,7 +79,7 @@ public class ProductController {
     @PutMapping("/{id}/stock")
     @Operation(summary = "Update stock", description = "Update product stock quantity")
     public ResponseEntity<Map<String, Object>> updateStock(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Parameter(name = "quantity", description = "Stock quantity") @RequestParam("quantity") int quantity) {
         if (productMap.containsKey(id)) {
             Map<String, Object> product = productMap.get(id);
@@ -92,7 +92,7 @@ public class ProductController {
 
     @GetMapping("/category/{category}")
     @Operation(summary = "Get products by category")
-    public List<Map<String, Object>> getProductsByCategory(@PathVariable String category) {
+    public List<Map<String, Object>> getProductsByCategory(@PathVariable("category") String category) {
         return productMap.values().stream()
             .filter(p -> p.get("category").toString().equalsIgnoreCase(category))
             .toList();

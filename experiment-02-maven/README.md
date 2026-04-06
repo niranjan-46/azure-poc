@@ -13,19 +13,22 @@ A college needs a web application to manage student records. Students can be add
 - ✅ Swagger UI Documentation
 - ✅ REST API
 
-## Files
-- `pom.xml` — Maven configuration
-- `src/main/java/com/devops/maven/MavenDemoApplication.java` — Main Spring Boot app
-- `src/main/java/com/devops/maven/model/Student.java` — Student model
-- `src/main/java/com/devops/maven/controller/StudentController.java` — REST API
-- `src/main/java/com/devops/maven/controller/ProductController.java` — Product API
-
 ## Build & Run
+
 ```bash
 cd experiment-02-maven
 mvn clean package
 java -jar target/maven-demo-app-1.0.0.jar
 ```
+
+## Access URLs
+
+| Service | URL |
+|---------|-----|
+| Web App | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| API Docs | http://localhost:8080/api-docs |
+| Health | http://localhost:8080/actuator/health |
 
 ## API Endpoints
 
@@ -48,19 +51,8 @@ java -jar target/maven-demo-app-1.0.0.jar
 | PUT | `/api/products/{id}/stock?quantity=10` | Update stock |
 | GET | `/api/products/category/{category}` | Get by category |
 
-## Sample Data
-
-### Students
-- John Smith - Computer Science (Grade: A)
-- Maria Garcia - Information Technology (Grade: A+)
-- David Chen - Software Engineering (Grade: B+)
-
-### Products
-- Laptop - Electronics - $999.99 (50 in stock)
-- Smartphone - Electronics - $699.99 (100 in stock)
-- Textbook - Books - $49.99 (25 in stock)
-
 ## Test with curl
+
 ```bash
 # Get all students
 curl http://localhost:8080/api/students
@@ -73,11 +65,31 @@ curl -X POST http://localhost:8080/api/students \
   -H "Content-Type: application/json" \
   -d '{"name":"New Student","email":"new@email.com","course":"AI","age":20,"grade":"A"}'
 
+# Update student
+curl -X PUT http://localhost:8080/api/students/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Updated","email":"john@email.com","course":"CS","age":21,"grade":"A+"}'
+
+# Delete student
+curl -X DELETE http://localhost:8080/api/students/1
+
 # Search students
 curl http://localhost:8080/api/students/search?query=John
+
+# Get all products
+curl http://localhost:8080/api/products
+
+# Update product stock
+curl -X PUT http://localhost:8080/api/products/1/stock?quantity=75
 ```
 
-## Access
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- API Docs: http://localhost:8080/api-docs
-- Health: http://localhost:8080/actuator/health
+## Docker
+
+```bash
+# Build
+cd experiment-02-maven
+docker build -t maven-demo-app:latest .
+
+# Run
+docker run -p 8080:8080 maven-demo-app:latest
+```
