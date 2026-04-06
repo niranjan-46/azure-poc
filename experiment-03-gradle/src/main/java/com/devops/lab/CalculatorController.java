@@ -1,5 +1,6 @@
 package com.devops.lab;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
@@ -8,7 +9,9 @@ import java.util.*;
 public class CalculatorController {
     
     @GetMapping("/add")
-    public Map<String, Object> add(@RequestParam int a, @RequestParam int b) {
+    public Map<String, Object> add(
+        @Parameter(name = "a", description = "First number") @RequestParam int a,
+        @Parameter(name = "b", description = "Second number") @RequestParam int b) {
         int result = a + b;
         Map<String, Object> response = new HashMap<>();
         response.put("operation", "add");
@@ -19,7 +22,9 @@ public class CalculatorController {
     }
     
     @GetMapping("/subtract")
-    public Map<String, Object> subtract(@RequestParam int a, @RequestParam int b) {
+    public Map<String, Object> subtract(
+        @Parameter(name = "a", description = "First number") @RequestParam int a,
+        @Parameter(name = "b", description = "Second number") @RequestParam int b) {
         int result = a - b;
         Map<String, Object> response = new HashMap<>();
         response.put("operation", "subtract");
@@ -30,7 +35,9 @@ public class CalculatorController {
     }
     
     @GetMapping("/multiply")
-    public Map<String, Object> multiply(@RequestParam int a, @RequestParam int b) {
+    public Map<String, Object> multiply(
+        @Parameter(name = "a", description = "First number") @RequestParam int a,
+        @Parameter(name = "b", description = "Second number") @RequestParam int b) {
         int result = a * b;
         Map<String, Object> response = new HashMap<>();
         response.put("operation", "multiply");
@@ -41,7 +48,9 @@ public class CalculatorController {
     }
     
     @GetMapping("/divide")
-    public Map<String, Object> divide(@RequestParam int a, @RequestParam int b) {
+    public Map<String, Object> divide(
+        @Parameter(name = "a", description = "First number") @RequestParam int a,
+        @Parameter(name = "b", description = "Second number") @RequestParam int b) {
         Map<String, Object> response = new HashMap<>();
         response.put("operation", "divide");
         response.put("a", a);
