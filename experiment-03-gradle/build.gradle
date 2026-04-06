@@ -26,7 +26,7 @@ dependencies {
 }
 
 bootJar {
-    archiveFileName = 'gradle-demo-app-1.0.0.jar'
+    archiveFileName = 'devops-gradle-app-1.0.0.jar'
 }
 
 test {
