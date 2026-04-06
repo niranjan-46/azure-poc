@@ -3,9 +3,10 @@
 # Usage: chmod +x install_jenkins.sh && sudo ./install_jenkins.sh
 set -e
 
-RED='\033[0;31m'; GREEN='\033[0;32m'; BLUE='\033[0;34m'; NC='\033[0m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[0;33m'; NC='\033[0m'
 
 log() { echo -e "${GREEN}[JENKINS]${NC} $1"; }
+warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 err() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 echo -e "${BLUE}"
@@ -34,8 +35,17 @@ echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkin
 
 # Install Jenkins
 log "Installing Jenkins..."
-apt-get update -y
-apt-get install -y jenkins
+apt-get update -y || {
+    warn "APT update failed, trying alternative method..."
+    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
+    dpkg -i /tmp/jenkins.deb || apt-get install -f -y
+}
+apt-get install -y jenkins || {
+    warn "Jenkins install failed, retrying..."
+    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
+    dpkg -i /tmp/jenkins.deb
+    apt-get install -f -y
+}
 
 # Start and enable Jenkins
 log "Starting Jenkins service..."

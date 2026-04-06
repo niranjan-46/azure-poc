@@ -116,8 +116,17 @@ echo ""
 info "Step 6: Installing Jenkins..."
 wget -q -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
 echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
-apt-get update -y
-apt-get install -y jenkins
+apt-get update -y || {
+    warn "APT update failed, trying alternative method..."
+    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
+    dpkg -i /tmp/jenkins.deb || apt-get install -f -y
+}
+apt-get install -y jenkins || {
+    warn "Jenkins install failed, retrying..."
+    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
+    dpkg -i /tmp/jenkins.deb
+    apt-get install -f -y
+}
 systemctl daemon-reload
 systemctl start jenkins
 systemctl enable jenkins
