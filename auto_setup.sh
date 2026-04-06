@@ -114,19 +114,26 @@ log "Git installed"
 # ========================================================================
 echo ""
 info "Step 6: Installing Jenkins..."
-wget -q -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
-apt-get update -y || {
-    warn "APT update failed, trying alternative method..."
-    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
-    dpkg -i /tmp/jenkins.deb || apt-get install -f -y
+
+# Remove old Jenkins repo if exists (prevents GPG errors)
+rm -f /etc/apt/sources.list.d/jenkins.list
+rm -f /usr/share/keyrings/jenkins-keyring.asc
+
+# Direct install method (avoids GPG key issues)
+JENKINS_VERSION="2.455"
+wget -q https://pkg.jenkins.io/debian-stable/jenkins_${JENKINS_VERSION}_all.deb -O /tmp/jenkins.deb || {
+    warn "Download failed, trying apt method..."
+    wget -q -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
+    apt-get update -y
+    apt-get install -y jenkins
+    systemctl daemon-reload
+    systemctl start jenkins
+    systemctl enable jenkins
+    log "Jenkins installed at http://localhost:8080"
+    return 0
 }
-apt-get install -y jenkins || {
-    warn "Jenkins install failed, retrying..."
-    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
-    dpkg -i /tmp/jenkins.deb
-    apt-get install -f -y
-}
+dpkg -i /tmp/jenkins.deb || apt-get install -f -y
 systemctl daemon-reload
 systemctl start jenkins
 systemctl enable jenkins
