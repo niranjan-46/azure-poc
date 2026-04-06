@@ -1,88 +1,102 @@
-# Experiment 03: Working with Gradle (Web Application)
+# Experiment 03: Gradle - Employee & Order Management System
 
 ## Aim
-Create a Gradle Spring Boot web application with REST API and Swagger UI.
+Build an Employee Management & E-commerce Order System using Gradle and Spring Boot with Swagger UI.
 
-## Theory
-Gradle with Spring Boot provides fast builds with automatic Swagger documentation.
+## Real-World Scenario
+A company needs to manage employee records and an e-commerce platform needs order management. Two different use cases to demonstrate Gradle flexibility.
+
+## Features
+- ✅ Employee CRUD Operations
+- ✅ Order Management
+- ✅ Department-based filtering
+- ✅ Search functionality
+- ✅ Swagger UI Documentation
+- ✅ REST API
 
 ## Files
-- `build.gradle` — Gradle configuration with Spring Boot
-- `src/main/java/com/devops/lab/DevOpsApplication.java` — Main Spring Boot App
-- `src/main/java/com/devops/lab/CalculatorController.java` — REST Controller
-- `src/main/resources/application.properties` — Configuration
-- `Dockerfile` — Docker image
-- `gradlew` — Gradle wrapper
+- `build.gradle` — Gradle configuration
+- `src/main/java/com/devops/gradle/GradleDemoApplication.java` — Main Spring Boot app
+- `src/main/java/com/devops/gradle/model/Employee.java` — Employee model
+- `src/main/java/com/devops/gradle/controller/EmployeeController.java` — Employee API
+- `src/main/java/com/devops/gradle/controller/OrderController.java` — Order API
 
-## Usage
-
-### Build Project
+## Build & Run
 ```bash
 cd experiment-03-gradle
 chmod +x gradlew
 ./gradlew clean build
+java -jar build/libs/gradle-demo-app-1.0.0.jar
 ```
-
-### Run Application
-```bash
-./gradlew bootRun
-```
-
-### Access Application
-- **Base URL:** http://your-server-ip:8080
-- **Swagger UI:** http://your-server-ip:8080/swagger-ui.html
-- **API Docs:** http://your-server-ip:8080/api-docs
-- **Health Check:** http://your-server-ip:8080/actuator/health
 
 ## API Endpoints
 
+### Employee Management
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/calculator/add?a=5&b=3` | Add two numbers |
-| GET | `/api/calculator/subtract?a=10&b=4` | Subtract two numbers |
-| GET | `/api/calculator/multiply?a=6&b=7` | Multiply two numbers |
-| GET | `/api/calculator/divide?a=15&b=3` | Divide two numbers |
+| GET | `/api/employees` | Get all employees |
+| GET | `/api/employees/{id}` | Get employee by ID |
+| POST | `/api/employees` | Create new employee |
+| PUT | `/api/employees/{id}` | Update employee |
+| DELETE | `/api/employees/{id}` | Delete employee |
+| GET | `/api/employees/department/{dept}` | Get by department |
+| GET | `/api/employees/search?query=name` | Search employees |
 
-## Example API Calls
+### Order Management
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/orders` | Get all orders |
+| GET | `/api/orders/{id}` | Get order by ID |
+| POST | `/api/orders` | Create new order |
+| PUT | `/api/orders/{id}/status?status=Shipped` | Update status |
+| GET | `/api/orders/status/{status}` | Get by status |
 
+## Sample Data
+
+### Employees
+- Alice Johnson - Engineering - Senior Developer - $75,000
+- Bob Williams - Marketing - Marketing Manager - $55,000
+- Carol Davis - HR - HR Manager - $65,000
+- Daniel Brown - Finance - Financial Analyst - $80,000
+
+### Orders
+- Emma Wilson - Laptop (2) - $1999.98 - Delivered
+- Frank Miller - Smartphone (1) - $699.99 - Shipped
+- Grace Lee - Headphones (3) - $149.97 - Processing
+
+## Test with curl
 ```bash
-# Add
-curl http://localhost:8080/api/calculator/add?a=5&b=3
-# Response: {"operation":"add","a":5,"b":3,"result":8}
+# Get all employees
+curl http://localhost:8080/api/employees
 
-# Subtract
-curl http://localhost:8080/api/calculator/subtract?a=10&b=4
-# Response: {"operation":"subtract","a":10,"b":4,"result":6}
+# Get employee by ID
+curl http://localhost:8080/api/employees/1
 
-# Multiply
-curl http://localhost:8080/api/calculator/multiply?a=6&b=7
-# Response: {"operation":"multiply","a":6,"b":7,"result":42}
+# Create employee
+curl -X POST http://localhost:8080/api/employees \
+  -H "Content-Type: application/json" \
+  -d '{"name":"New Employee","email":"new@company.com","department":"IT","salary":60000,"designation":"Developer"}'
 
-# Divide
-curl http://localhost:8080/api/calculator/divide?a=15&b=3
-# Response: {"operation":"divide","a":15,"b":3,"result":5.0}
+# Get employees by department
+curl http://localhost:8080/api/employees/department/Engineering
+
+# Get all orders
+curl http://localhost:8080/api/orders
+
+# Update order status
+curl -X PUT "http://localhost:8080/api/orders/1/status?status=Delivered"
 ```
 
-## Docker
+## Access
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- API Docs: http://localhost:8080/api-docs
+- Health: http://localhost:8080/actuator/health
 
-### Build Docker Image
-```bash
-docker build -t devops-gradle-app:latest .
-```
+## Gradle vs Maven Comparison
 
-### Run Docker Container
-```bash
-docker run -p 8080:8080 devops-gradle-app:latest
-```
-
-## Gradle Commands
-```bash
-./gradlew clean build      # Clean and build
-./gradlew bootRun          # Run Spring Boot app
-./gradlew test            # Run tests
-./gradlew bootJar         # Create JAR
-./gradlew bootDocker      # Build Docker image
-```
-
-## Swagger UI
-Open http://localhost:8080/swagger-ui.html to see interactive API documentation.
+| Feature | Maven | Gradle |
+|---------|-------|--------|
+| Config File | pom.xml | build.gradle |
+| Language | XML | Groovy DSL |
+| Build Speed | Slower | Faster (cache) |
+| This Project | Student/Product System | Employee/Order System |

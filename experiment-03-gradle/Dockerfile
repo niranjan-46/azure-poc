@@ -1,9 +1,9 @@
 FROM openjdk:17-jdk-slim
-LABEL maintainer="DevOps Workshop"
+LABEL maintainer="DevOps Workshop - Gradle"
 
 WORKDIR /app
 
-COPY build/libs/devops-gradle-app-1.0-SNAPSHOT.jar app.jar
+COPY build/libs/gradle-demo-app-1.0.0.jar app.jar
 
 EXPOSE 8080
 

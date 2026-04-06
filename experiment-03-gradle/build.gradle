@@ -4,8 +4,8 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
-group = 'com.devops.lab'
-version = '1.0-SNAPSHOT'
+group = 'com.devops.gradle'
+version = '1.0.0'
 
 java {
     toolchain {
@@ -27,32 +27,17 @@ dependencies {
 }
 
 application {
-    mainClass = 'com.devops.lab.DevOpsApplication'
+    mainClass = 'com.devops.gradle.GradleDemoApplication'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['--enable-preview']
+}
+
+bootJar {
+    mainClass = 'com.devops.gradle.GradleDemoApplication'
 }
 
 test {
     useJUnitPlatform()
-    testLogging {
-        events 'passed', 'skipped', 'failed'
-    }
-}
-
-tasks.register('hello') {
-    group = 'DevOps'
-    description = 'Prints a hello from Gradle'
-    doLast {
-        println 'Hello from Gradle Task!'
-        println 'Build version: ' + version
-    }
-}
-
-tasks.register('projectInfo') {
-    group = 'DevOps'
-    description = 'Displays project metadata'
-    doLast {
-        println 'Project: ' + project.name
-        println 'Group: '   + project.group
-        println 'Version: ' + project.version
-        println 'Java: '    + System.getProperty('java.version')
-    }
 }

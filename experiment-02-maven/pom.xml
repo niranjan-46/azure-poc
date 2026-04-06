@@ -4,12 +4,12 @@
   xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd'>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.devops.lab</groupId>
-  <artifactId>devops-maven-app</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <groupId>com.devops.maven</groupId>
+  <artifactId>maven-demo-app</artifactId>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
-  <name>DevOps Maven App</name>
-  <description>DevOps Workshop Web Application</description>
+  <name>Maven Demo App</name>
+  <description>Student Management System - Maven Demo</description>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
@@ -19,28 +19,24 @@
   </properties>
 
   <dependencies>
-    <!-- Spring Boot Web -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${spring-boot.version}</version>
     </dependency>
 
-    <!-- Spring Boot REST Docs -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>2.3.0</version>
     </dependency>
 
-    <!-- Spring Boot Actuator -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
       <version>${spring-boot.version}</version>
     </dependency>
 
-    <!-- JUnit 5 -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -61,15 +57,10 @@
               <goal>repackage</goal>
             </goals>
             <configuration>
-              <mainClass>com.devops.lab.DevOpsApplication</mainClass>
+              <mainClass>com.devops.maven.MavenDemoApplication</mainClass>
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
       </plugin>
     </plugins>
   </build>

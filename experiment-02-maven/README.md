@@ -1,77 +1,83 @@
-# Experiment 02: Working with Maven (Web Application)
+# Experiment 02: Maven - Student Management System
 
 ## Aim
-Create a Maven Spring Boot web application with REST API and Swagger UI.
+Build a Student Management System REST API using Maven and Spring Boot with Swagger UI.
 
-## Theory
-Spring Boot provides REST APIs with automatic documentation via Swagger UI.
+## Real-World Scenario
+A college needs a web application to manage student records. Students can be added, updated, deleted, and searched.
+
+## Features
+- ✅ Student CRUD Operations
+- ✅ Product Management
+- ✅ Search functionality
+- ✅ Swagger UI Documentation
+- ✅ REST API
 
 ## Files
-- `pom.xml` — Maven configuration with Spring Boot
-- `src/main/java/com/devops/lab/DevOpsApplication.java` — Main Spring Boot App
-- `src/main/java/com/devops/lab/CalculatorController.java` — REST Controller
-- `src/main/resources/application.properties` — Configuration
-- `Dockerfile` — Docker image
+- `pom.xml` — Maven configuration
+- `src/main/java/com/devops/maven/MavenDemoApplication.java` — Main Spring Boot app
+- `src/main/java/com/devops/maven/model/Student.java` — Student model
+- `src/main/java/com/devops/maven/controller/StudentController.java` — REST API
+- `src/main/java/com/devops/maven/controller/ProductController.java` — Product API
 
-## Usage
-
-### Build Project
+## Build & Run
 ```bash
 cd experiment-02-maven
 mvn clean package
+java -jar target/maven-demo-app-1.0.0.jar
 ```
-
-### Run Application
-```bash
-java -jar target/devops-maven-app-1.0-SNAPSHOT.jar
-```
-
-### Access Application
-- **Base URL:** http://your-server-ip:8080
-- **Swagger UI:** http://your-server-ip:8080/swagger-ui.html
-- **API Docs:** http://your-server-ip:8080/api-docs
-- **Health Check:** http://your-server-ip:8080/actuator/health
 
 ## API Endpoints
 
+### Student Management
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/calculator/add?a=5&b=3` | Add two numbers |
-| GET | `/api/calculator/subtract?a=10&b=4` | Subtract two numbers |
-| GET | `/api/calculator/multiply?a=6&b=7` | Multiply two numbers |
-| GET | `/api/calculator/divide?a=15&b=3` | Divide two numbers |
+| GET | `/api/students` | Get all students |
+| GET | `/api/students/{id}` | Get student by ID |
+| POST | `/api/students` | Create new student |
+| PUT | `/api/students/{id}` | Update student |
+| DELETE | `/api/students/{id}` | Delete student |
+| GET | `/api/students/search?query=name` | Search students |
 
-## Example API Calls
+### Product Management
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products` | Get all products |
+| GET | `/api/products/{id}` | Get product by ID |
+| POST | `/api/products` | Add new product |
+| PUT | `/api/products/{id}/stock?quantity=10` | Update stock |
+| GET | `/api/products/category/{category}` | Get by category |
 
+## Sample Data
+
+### Students
+- John Smith - Computer Science (Grade: A)
+- Maria Garcia - Information Technology (Grade: A+)
+- David Chen - Software Engineering (Grade: B+)
+
+### Products
+- Laptop - Electronics - $999.99 (50 in stock)
+- Smartphone - Electronics - $699.99 (100 in stock)
+- Textbook - Books - $49.99 (25 in stock)
+
+## Test with curl
 ```bash
-# Add
-curl http://localhost:8080/api/calculator/add?a=5&b=3
-# Response: {"operation":"add","a":5,"b":3,"result":8}
+# Get all students
+curl http://localhost:8080/api/students
 
-# Subtract
-curl http://localhost:8080/api/calculator/subtract?a=10&b=4
-# Response: {"operation":"subtract","a":10,"b":4,"result":6}
+# Get student by ID
+curl http://localhost:8080/api/students/1
 
-# Multiply
-curl http://localhost:8080/api/calculator/multiply?a=6&b=7
-# Response: {"operation":"multiply","a":6,"b":7,"result":42}
+# Create student
+curl -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{"name":"New Student","email":"new@email.com","course":"AI","age":20,"grade":"A"}'
 
-# Divide
-curl http://localhost:8080/api/calculator/divide?a=15&b=3
-# Response: {"operation":"divide","a":15,"b":3,"result":5.0}
+# Search students
+curl http://localhost:8080/api/students/search?query=John
 ```
 
-## Docker
-
-### Build Docker Image
-```bash
-docker build -t devops-maven-app:latest .
-```
-
-### Run Docker Container
-```bash
-docker run -p 8080:8080 devops-maven-app:latest
-```
-
-## Swagger UI
-Open http://localhost:8080/swagger-ui.html to see interactive API documentation.
+## Access
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- API Docs: http://localhost:8080/api-docs
+- Health: http://localhost:8080/actuator/health
