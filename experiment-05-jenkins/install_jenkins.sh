@@ -23,29 +23,13 @@ fi
 # Install dependencies
 log "Installing dependencies..."
 apt-get update -y
-apt-get install -y wget gnupg2 apt-transport-https
+apt-get install -y wget gnupg2 apt-transport-https openjdk-17-jdk -y
 
-# Add Jenkins GPG key
-log "Adding Jenkins repository..."
-wget -q -O /usr/share/keyrings/jenkins-keyring.asc \
-    https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-
-# Add Jenkins repository
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
-
-# Install Jenkins
-log "Installing Jenkins..."
-apt-get update -y || {
-    warn "APT update failed, trying alternative method..."
-    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
-    dpkg -i /tmp/jenkins.deb || apt-get install -f -y
-}
-apt-get install -y jenkins || {
-    warn "Jenkins install failed, retrying..."
-    wget -q https://pkg.jenkins.io/debian-stable/jenkins_2.455_all.deb -O /tmp/jenkins.deb
-    dpkg -i /tmp/jenkins.deb
-    apt-get install -f -y
-}
+# Direct install method (avoids GPG key issues)
+log "Installing Jenkins via direct download..."
+JENKINS_VERSION="2.455"
+wget -q https://pkg.jenkins.io/debian-stable/jenkins_${JENKINS_VERSION}_all.deb -O /tmp/jenkins.deb
+dpkg -i /tmp/jenkins.deb || apt-get install -f -y
 
 # Start and enable Jenkins
 log "Starting Jenkins service..."
