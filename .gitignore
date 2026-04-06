@@ -49,3 +49,7 @@ temp/
 tmp/
 *.tmp
 ~*
+
+# Old lab files (duplicate - should not be in repo)
+src/main/java/com/devops/lab/
+src/test/java/com/devops/lab/

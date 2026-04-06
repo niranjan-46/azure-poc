@@ -195,6 +195,13 @@ echo ""
 info "Step 12: Building Gradle project..."
 cd "$SCRIPT_DIR/experiment-03-gradle"
 
+# Clean up duplicate lab files before building
+info "Cleaning up duplicate lab files..."
+rm -rf src/main/java/com/devops/lab 2>/dev/null || true
+rm -rf src/test/java/com/devops/lab 2>/dev/null || true
+rm -rf .gradle 2>/dev/null || true
+log "Cleanup complete"
+
 # Try gradlew first, fallback to system gradle
 if [ -f "gradle/wrapper/gradle-wrapper.jar" ]; then
     ./gradlew clean build -x test
