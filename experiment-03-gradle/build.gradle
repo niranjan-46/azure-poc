@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.devops.lab'
+version = '1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
+}
+
+application {
+    mainClass = 'com.devops.lab.App'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+tasks.register('hello') {
+    group = 'DevOps'
+    description = 'Prints a hello from Gradle'
+    doLast {
+        println 'Hello from Gradle Task!'
+        println 'Build version: ' + version
+    }
+}
+
+tasks.register('projectInfo') {
+    group = 'DevOps'
+    description = 'Displays project metadata'
+    doLast {
+        println 'Project: ' + project.name
+        println 'Group: '   + project.group
+        println 'Version: ' + project.version
+        println 'Java: '    + System.getProperty('java.version')
+    }
+}
