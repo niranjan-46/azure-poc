@@ -34,7 +34,7 @@ git --version
 
 ---
 
-## Step 2: Build with Maven
+## Step 2: Build Maven Web App (with Swagger UI)
 
 ```bash
 # Go to Maven project
@@ -45,14 +45,16 @@ mvn clean package
 
 # Run the application
 java -jar target/devops-maven-app-1.0-SNAPSHOT.jar
-
-# Run tests
-mvn test
 ```
+
+**Access the Web UI:**
+- **Swagger UI:** http://your-server-ip:8080/swagger-ui.html
+- **API Docs:** http://your-server-ip:8080/api-docs
+- **Health:** http://your-server-ip:8080/actuator/health
 
 ---
 
-## Step 3: Build with Gradle
+## Step 3: Build Gradle Web App (with Swagger UI)
 
 ```bash
 # Go to Gradle project
@@ -65,14 +67,13 @@ chmod +x gradlew
 ./gradlew clean build
 
 # Run the application
-./gradlew run
-
-# Run tests
-./gradlew test
-
-# Try custom task
-./gradlew hello
+java -jar build/libs/devops-gradle-app-1.0-SNAPSHOT.jar
 ```
+
+**Access the Web UI:**
+- **Swagger UI:** http://your-server-ip:8080/swagger-ui.html
+- **API Docs:** http://your-server-ip:8080/api-docs
+- **Health:** http://your-server-ip:8080/actuator/health
 
 ---
 
@@ -258,6 +259,17 @@ sudo ./master_setup.sh
 
 ---
 
+## API Endpoints (Both Maven & Gradle)
+
+| Method | Endpoint | Description | Example |
+|--------|----------|-------------|---------|
+| GET | `/api/calculator/add?a=5&b=3` | Add | `{"result":8}` |
+| GET | `/api/calculator/subtract?a=10&b=4` | Subtract | `{"result":6}` |
+| GET | `/api/calculator/multiply?a=6&b=7` | Multiply | `{"result":42}` |
+| GET | `/api/calculator/divide?a=15&b=3` | Divide | `{"result":5.0}` |
+
+---
+
 ## Quick Reference: All Commands
 
 ```bash
@@ -265,30 +277,28 @@ sudo ./master_setup.sh
 sudo apt update && sudo apt upgrade -y
 cd experiment-12-complete && sudo ./master_setup.sh
 
-# === MAVEN ===
+# === MAVEN (Web App with Swagger) ===
 cd experiment-02-maven
 mvn clean package
 java -jar target/devops-maven-app-1.0-SNAPSHOT.jar
 
-# === GRADLE ===
+# === GRADLE (Web App with Swagger) ===
 cd experiment-03-gradle
 chmod +x gradlew
 ./gradlew clean build
-./gradlew run
+java -jar build/libs/devops-gradle-app-1.0-SNAPSHOT.jar
 
-# === JENKINS ===
-sudo systemctl status jenkins
-http://localhost:8080
-
-# === ANSIBLE ===
-cd experiment-07-ansible
-ansible all -i hosts.ini -m ping
-ansible-playbook -i hosts.ini setup_webserver.yml
+# === SWAGGER UI ===
+# Open: http://your-ip:8080/swagger-ui.html
 
 # === DOCKER ===
 cd experiment-02-maven
 docker build -t devops-maven-app:latest .
 docker run -p 8080:8080 devops-maven-app:latest
+
+# === AUTO SETUP ===
+chmod +x auto_setup.sh
+sudo ./auto_setup.sh
 
 # === LAUNCHER ===
 chmod +x devops-launcher.sh
@@ -327,3 +337,58 @@ This provides a menu to:
 | Jenkins won't start | `sudo systemctl restart jenkins` |
 | Ansible ping fails | Check hosts.ini inventory |
 | Azure pipeline fails | Check Azure subscription |
+
+---
+
+## Web Application Features
+
+Both Maven and Gradle projects now include:
+
+✅ **Spring Boot Web Application**
+✅ **REST API** - Calculator operations
+✅ **Swagger UI** - Interactive API documentation
+✅ **OpenAPI Docs** - Machine-readable API spec
+✅ **Actuator** - Health monitoring
+✅ **Docker Support** - Container deployment
+
+---
+
+## Access URLs
+
+When running the application:
+
+| Service | URL |
+|---------|-----|
+| Web App | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| API Docs | http://localhost:8080/api-docs |
+| Health | http://localhost:8080/actuator/health |
+
+---
+
+## Tools Covered
+
+| Category | Tools |
+|----------|-------|
+| Build Tools | Maven, Gradle |
+| CI/CD | Jenkins, Azure DevOps |
+| Configuration Management | Ansible |
+| Container | Docker |
+| Version Control | Git/GitLab |
+| Web Framework | Spring Boot |
+| API Documentation | Swagger UI |
+
+---
+
+## Assessment Details
+
+### CIE — 50 Marks Total
+| Component | Weightage | Max Marks |
+|-----------|----------|-----------|
+| Record / Journal (all 12 experiments) | 60% | 30 |
+| CIE Test (viva + conduction) | 40% | 20 |
+
+### SEE — 50 Marks Total
+- Write-up: 20% (20 marks)
+- Conduction Procedure & Result: 60% (60 marks)
+- Viva Voce: 20% (20 marks)
