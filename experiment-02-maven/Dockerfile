@@ -3,7 +3,7 @@ LABEL maintainer="DevOps Workshop"
 
 WORKDIR /app
 
-COPY experiment-02-maven/target/devops-maven-app-1.0-SNAPSHOT.jar app.jar
+COPY target/devops-maven-app-1.0-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 

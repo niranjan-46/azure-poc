@@ -3,7 +3,7 @@ LABEL maintainer="DevOps Workshop"
 
 WORKDIR /app
 
-COPY experiment-03-gradle/build/libs/*.jar app.jar
+COPY build/libs/devops-gradle-app-1.0-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
