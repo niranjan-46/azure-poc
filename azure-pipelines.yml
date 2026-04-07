@@ -1,0 +1,85 @@
+# Azure Pipelines YAML for Maven Docker Deployment to Azure Container App
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '03ea8436-f11d-4563-b86e-4be3964ce94b'
+  imageRepository: 'backendappmvn'
+  containerRegistry: 'devopspocacr.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/experiment-02-maven/Dockerfile'
+  tag: '$(Build.BuildId)'
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+  azureSubscription: 'Azure subscription 1'
+  resourceGroup: 'my-rg'
+
+stages:
+- stage: Build
+  displayName: 'Build Maven and Docker Image'
+  jobs:
+  - job: MavenBuild
+    displayName: 'Maven Build & Test'
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Maven@4
+      displayName: 'Maven Build'
+      inputs:
+        mavenPomFile: 'experiment-02-maven/pom.xml'
+        goals: 'clean package'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.17'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Maven Artifacts'
+      inputs:
+        PathtoPublish: 'experiment-02-maven/target'
+        ArtifactName: 'maven-artifacts'
+
+  - job: DockerBuild
+    displayName: 'Build and Push Docker Image'
+    dependsOn: MavenBuild
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: 'Build and push an image to container registry'
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+
+- stage: Deploy
+  displayName: 'Deploy to Azure Container App'
+  dependsOn: Build
+  jobs:
+  - deployment: DeployToContainerApp
+    displayName: 'Deploy to Azure Container App'
+    environment: 'production'
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Update Azure Container App'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az containerapp update \
+                  --name backend-app \
+                  --resource-group $(resourceGroup) \
+                  --image $(containerRegistry)/$(imageRepository):$(tag)
