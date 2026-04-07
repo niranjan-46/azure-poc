@@ -11,11 +11,11 @@ pool:
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-  registryName: 'jenkinspractice'
+  registryName: 'devopspocacr'
   repositoryName: 'backend-app'
   tag: $(Build.BuildId)
-  azureSubscription: 'YOUR_AZURE_SUBSCRIPTION'  # Replace with your Azure subscription service connection
-  resourceGroup: 'YOUR_RESOURCE_GROUP'  # Replace with your resource group name
+  azureSubscription: 'Azure subscription 1'
+  resourceGroup: 'my-rg'
 
 stages:
   - stage: Build
