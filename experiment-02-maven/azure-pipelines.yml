@@ -61,6 +61,12 @@ stages:
         ls -l target
       displayName: 'Build Maven Project'
 
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/$(workingDir)/target'
+        artifact: 'maven-target'
+      displayName: 'Publish Maven Build Artifact'
+
 # ================= DOCKER =================
 - stage: BuildAndPushDocker
   dependsOn: Build
@@ -69,6 +75,12 @@ stages:
     steps:
 
     - checkout: self
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: 'maven-target'
+        targetPath: '$(Build.SourcesDirectory)/$(workingDir)/target'
+      displayName: 'Download Maven Build Artifact'
 
     # ✅ Azure login
     - task: AzureCLI@2
