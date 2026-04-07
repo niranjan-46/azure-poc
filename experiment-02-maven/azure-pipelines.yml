@@ -3,13 +3,12 @@ trigger:
     include:
       - master
 
-# ✅ Use your self-hosted agent
+# ✅ Use self-hosted agent
 pool:
   name: 'Default'
 
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
-  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
   registryName: 'devopspocacr'
   repositoryName: 'backend-app'
@@ -39,14 +38,11 @@ stages:
           maven | "$(Agent.OS)"
         path: $(MAVEN_CACHE_FOLDER)
 
-    - task: Maven@4
+    # ✅ Use script instead of Maven task
+    - script: |
+        cd $(workingDir)
+        mvn clean package -DskipTests
       displayName: 'Build Maven Project'
-      inputs:
-        mavenPomFile: '$(workingDir)/pom.xml'
-        goals: 'clean package'
-        options: '-DskipTests'
-        javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.17'
 
 # ================= DOCKER =================
 - stage: BuildAndPushDocker
@@ -59,7 +55,7 @@ stages:
       name: 'Default'
     steps:
 
-    # ✅ Login to Azure
+    # ✅ Azure login
     - task: AzureCLI@2
       displayName: 'Login to Azure'
       inputs:
@@ -69,12 +65,12 @@ stages:
         inlineScript: |
           az acr login --name $(registryName)
 
-    # ✅ Build Docker image
+    # ✅ Build image
     - script: |
         docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) $(workingDir)
       displayName: 'Build Docker Image'
 
-    # ✅ Push Docker image
+    # ✅ Push image
     - script: |
         docker push $(registryName).azurecr.io/$(repositoryName):$(tag)
       displayName: 'Push Docker Image'
