@@ -14,7 +14,9 @@ variables:
   repositoryName: 'backend-app'
   tag: $(Build.BuildId)
 
-  azureSubscription: 'Azure subscription 1 (e9a472da-79d4-4781-90da-445594c7bc6c)'
+  # ✅ FIXED HERE
+  azureSubscription: 'azure-service-conn'
+
   resourceGroup: 'my-rg'
   workingDir: 'experiment-02-maven'
 
@@ -59,7 +61,7 @@ stages:
     - task: AzureCLI@2
       displayName: 'Login to Azure'
       inputs:
-        azureSubscription: 'Azure subscription 1 (e9a472da-79d4-4781-90da-445594c7bc6c)'
+        azureSubscription: 'azure-service-conn'   # ✅ FIXED
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
@@ -90,7 +92,7 @@ stages:
     - task: AzureCLI@2
       displayName: 'Update Container App'
       inputs:
-        azureSubscription: 'Azure subscription 1 (e9a472da-79d4-4781-90da-445594c7bc6c)'
+        azureSubscription: 'azure-service-conn'   # ✅ FIXED
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
