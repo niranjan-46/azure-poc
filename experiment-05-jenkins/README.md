@@ -12,13 +12,12 @@ Jenkins is an open-source automation server for CI/CD. It uses Pipelines (Jenkin
 ## Usage
 
 ### Install Jenkins on Ubuntu VM using Ansible
-1. Ensure Ansible is installed on your control machine.
-2. Update your Ansible inventory (e.g., `/etc/ansible/hosts` or a custom inventory file) with your Ubuntu VM details.
+1. Ensure Ansible is installed on your Ubuntu VM.
+2. Use the provided `hosts.ini` inventory file (configured for localhost).
 3. Run the playbook:
 ```bash
-ansible-playbook -i your_inventory_file install_jenkins.yml
+ansible-playbook -i hosts.ini install_jenkins.yml
 ```
-Replace `your_inventory_file` with your Ansible inventory file (e.g., `hosts.ini`).
 
 ### Access Jenkins
 - URL: http://localhost:8080
