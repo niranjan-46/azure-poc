@@ -21,6 +21,21 @@ mvn clean package
 java -jar target/maven-demo-app-1.0.0.jar
 ```
 
+## Azure Pipeline Deployment
+
+To deploy using Azure Pipelines:
+
+1. Ensure you have an Azure DevOps project set up.
+2. Create a service connection for your Azure subscription.
+3. Update the `azureSubscription` and `resourceGroup` variables in `azure-pipelines.yml`.
+4. Commit and push the code to the `main` branch to trigger the pipeline.
+
+The pipeline will:
+- Build the Maven project
+- Create a Docker image tagged with the build ID
+- Push to Azure Container Registry (`jenkinspractice`)
+- Deploy to Azure Container App (`backend-app`)
+
 ## Access URLs
 
 | Service | URL |
