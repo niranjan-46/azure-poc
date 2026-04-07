@@ -3,7 +3,7 @@ trigger:
     include:
       - master
 
-# ✅ Use your specific self-hosted agent
+# ✅ Force your self-hosted agent
 pool:
   name: 'Default'
   demands:
@@ -34,6 +34,7 @@ stages:
 
     - checkout: self
 
+    # ✅ Cache Maven dependencies
     - task: Cache@2
       inputs:
         key: 'maven | "$(Agent.OS)" | $(workingDir)/pom.xml'
@@ -41,7 +42,14 @@ stages:
           maven | "$(Agent.OS)"
         path: $(MAVEN_CACHE_FOLDER)
 
+    # ✅ Build using system Maven (FIXED)
     - script: |
+        echo "JAVA VERSION:"
+        java -version
+
+        echo "MAVEN VERSION:"
+        mvn -v
+
         cd $(workingDir)
         mvn clean package -DskipTests
       displayName: 'Build Maven Project'
@@ -57,7 +65,7 @@ stages:
 
     - checkout: self
 
-    # ✅ Login + ACR login
+    # ✅ Azure + ACR login
     - task: AzureCLI@2
       displayName: 'Azure Login + ACR Login'
       inputs:
@@ -65,14 +73,15 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          az account show
           az acr login --name $(registryName)
 
-    # ✅ Docker Build
+    # ✅ Docker build
     - script: |
         docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) $(workingDir)
       displayName: 'Build Docker Image'
 
-    # ✅ Docker Push
+    # ✅ Docker push
     - script: |
         docker push $(registryName).azurecr.io/$(repositoryName):$(tag)
       displayName: 'Push Docker Image'
