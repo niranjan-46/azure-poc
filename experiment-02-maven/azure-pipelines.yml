@@ -3,7 +3,6 @@ trigger:
     include:
       - master
 
-# ✅ Force your self-hosted agent
 pool:
   name: 'Default'
   demands:
@@ -26,15 +25,18 @@ stages:
 
 # ================= BUILD =================
 - stage: Build
-  displayName: 'Build Stage'
   jobs:
   - job: MavenBuild
-    displayName: 'Maven Build'
     steps:
 
     - checkout: self
 
-    # ✅ Cache Maven dependencies
+    # ✅ Create cache folder (fix previous error)
+    - script: |
+        mkdir -p $(MAVEN_CACHE_FOLDER)
+      displayName: 'Create Maven Cache Directory'
+
+    # ✅ Cache dependencies
     - task: Cache@2
       inputs:
         key: 'maven | "$(Agent.OS)" | $(workingDir)/pom.xml'
@@ -42,8 +44,10 @@ stages:
           maven | "$(Agent.OS)"
         path: $(MAVEN_CACHE_FOLDER)
 
-    # ✅ Build using system Maven (FIXED)
+    # ✅ Build project
     - script: |
+        export MAVEN_OPTS="-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+
         echo "JAVA VERSION:"
         java -version
 
@@ -52,22 +56,22 @@ stages:
 
         cd $(workingDir)
         mvn clean package -DskipTests
+
+        echo "Checking JAR:"
+        ls -l target
       displayName: 'Build Maven Project'
 
 # ================= DOCKER =================
 - stage: BuildAndPushDocker
-  displayName: 'Build and Push Docker Image'
   dependsOn: Build
   jobs:
   - job: DockerBuild
-    displayName: 'Docker Build & Push'
     steps:
 
     - checkout: self
 
-    # ✅ Azure + ACR login
+    # ✅ Azure login
     - task: AzureCLI@2
-      displayName: 'Azure Login + ACR Login'
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
@@ -76,27 +80,25 @@ stages:
           az account show
           az acr login --name $(registryName)
 
-    # ✅ Docker build
+    # ✅ FIXED Docker build (IMPORTANT CHANGE)
     - script: |
-        docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) $(workingDir)
+        cd $(workingDir)
+        docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) .
       displayName: 'Build Docker Image'
 
-    # ✅ Docker push
+    # ✅ Push
     - script: |
         docker push $(registryName).azurecr.io/$(repositoryName):$(tag)
       displayName: 'Push Docker Image'
 
 # ================= DEPLOY =================
 - stage: Deploy
-  displayName: 'Deploy to Azure Container App'
   dependsOn: BuildAndPushDocker
   jobs:
   - job: Deploy
-    displayName: 'Deploy'
     steps:
 
     - task: AzureCLI@2
-      displayName: 'Deploy to Container App'
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
