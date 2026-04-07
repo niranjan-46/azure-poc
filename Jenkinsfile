@@ -37,15 +37,15 @@ pipeline {
 stage('Push Image') {
     steps {
         withCredentials([
-            string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
-            string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
-            string(credentialsId: 'AZURE_TENANT_ID', variable: 'TENANT_ID')
+            string(credentialsId: 'AZURE_CLIENT_ID', variable: AZURE_'CLIENT_ID'),
+            string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'AZURE_CLIENT_SECRET'),
+            string(credentialsId: 'AZURE_TENANT_ID', variable: 'AZURE_TENANT_ID')
         ]) {
             sh '''
             az login --service-principal \
-              -u $CLIENT_ID \
-              -p $CLIENT_SECRET \
-              --tenant $TENANT_ID
+              -u $AZURE_CLIENT_ID \
+              -p $AZURE_CLIENT_SECRET \
+              --tenant $AZURE_TENANT_ID
 
             az acr login --name $ACR_NAME
 
@@ -57,15 +57,15 @@ stage('Push Image') {
 stage('Deploy to Azure') {
     steps {
         withCredentials([
-            string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
-            string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
-            string(credentialsId: 'AZURE_TENANT_ID', variable: 'TENANT_ID')
+            string(credentialsId: 'AZURE_CLIENT_ID', variable: 'AZURE_CLIENT_ID'),
+            string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'AZURE_CLIENT_SECRET'),
+            string(credentialsId: 'AZURE_TENANT_ID', variable: 'AZURE_TENANT_ID')
         ]) {
             sh '''
             az login --service-principal \
-              -u $CLIENT_ID \
-              -p $CLIENT_SECRET \
-              --tenant $TENANT_ID
+              -u $AZURE_CLIENT_ID \
+              -p $AZURE_CLIENT_SECRET \
+              --tenant $AZURE_TENANT_ID
 
             az containerapp update \
               --name $CONTAINER_APP \
