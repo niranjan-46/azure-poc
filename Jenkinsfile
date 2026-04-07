@@ -18,15 +18,19 @@ pipeline {
 
         stage('Build Maven') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                dir('experiment-02-maven') {
+                    sh 'mvn clean package -DskipTests'
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh '''
-                docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:$BUILD_NUMBER .
-                '''
+                dir('experiment-02-maven') {
+                    sh '''
+                    docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:$BUILD_NUMBER .
+                    '''
+                }
             }
         }
 
