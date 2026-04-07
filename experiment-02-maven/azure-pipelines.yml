@@ -3,9 +3,11 @@ trigger:
     include:
       - master
 
-# ✅ Use self-hosted agent
+# ✅ Use your specific self-hosted agent
 pool:
   name: 'Default'
+  demands:
+    - agent.name -equals azure-poc
 
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
@@ -16,6 +18,8 @@ variables:
 
   azureSubscription: 'azure-service-conn'
   resourceGroup: 'my-rg'
+  containerAppName: 'backend-app'
+
   workingDir: 'experiment-02-maven'
 
 stages:
@@ -26,19 +30,17 @@ stages:
   jobs:
   - job: MavenBuild
     displayName: 'Maven Build'
-    pool:
-      name: 'Default'
     steps:
 
+    - checkout: self
+
     - task: Cache@2
-      displayName: 'Cache Maven dependencies'
       inputs:
         key: 'maven | "$(Agent.OS)" | $(workingDir)/pom.xml'
         restoreKeys: |
           maven | "$(Agent.OS)"
         path: $(MAVEN_CACHE_FOLDER)
 
-    # ✅ Use script instead of Maven task
     - script: |
         cd $(workingDir)
         mvn clean package -DskipTests
@@ -51,13 +53,13 @@ stages:
   jobs:
   - job: DockerBuild
     displayName: 'Docker Build & Push'
-    pool:
-      name: 'Default'
     steps:
 
-    # ✅ Azure login
+    - checkout: self
+
+    # ✅ Login + ACR login
     - task: AzureCLI@2
-      displayName: 'Login to Azure'
+      displayName: 'Azure Login + ACR Login'
       inputs:
         azureSubscription: $(azureSubscription)
         scriptType: bash
@@ -65,12 +67,12 @@ stages:
         inlineScript: |
           az acr login --name $(registryName)
 
-    # ✅ Build image
+    # ✅ Docker Build
     - script: |
         docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) $(workingDir)
       displayName: 'Build Docker Image'
 
-    # ✅ Push image
+    # ✅ Docker Push
     - script: |
         docker push $(registryName).azurecr.io/$(repositoryName):$(tag)
       displayName: 'Push Docker Image'
@@ -82,8 +84,6 @@ stages:
   jobs:
   - job: Deploy
     displayName: 'Deploy'
-    pool:
-      name: 'Default'
     steps:
 
     - task: AzureCLI@2
@@ -94,6 +94,6 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           az containerapp update \
-            --name $(repositoryName) \
+            --name $(containerAppName) \
             --resource-group $(resourceGroup) \
             --image $(registryName).azurecr.io/$(repositoryName):$(tag)
