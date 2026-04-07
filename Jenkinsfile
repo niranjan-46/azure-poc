@@ -34,35 +34,46 @@ pipeline {
             }
         }
 
-        stage('Push Image') {
-            steps {
-                sh '''
-                az acr login --name $ACR_NAME
-                docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:$BUILD_NUMBER
-                '''
-            }
-        }
+stage('Push Image') {
+    steps {
+        withCredentials([
+            string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
+            string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
+            string(credentialsId: 'AZURE_TENANT_ID', variable: 'TENANT_ID')
+        ]) {
+            sh '''
+            az login --service-principal \
+              -u $CLIENT_ID \
+              -p $CLIENT_SECRET \
+              --tenant $TENANT_ID
 
-        stage('Deploy to Azure') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
-                    string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
-                    string(credentialsId: 'AZURE_TENANT_ID', variable: 'TENANT_ID')
-                ]) {
-                    sh '''
-                    az login --service-principal \
-                      -u $CLIENT_ID \
-                      -p $CLIENT_SECRET \
-                      --tenant $TENANT_ID
+            az acr login --name $ACR_NAME
 
-                    az containerapp update \
-                      --name $CONTAINER_APP \
-                      --resource-group $RESOURCE_GROUP \
-                      --image $ACR_NAME.azurecr.io/$IMAGE_NAME:$BUILD_NUMBER
-                    '''
-                }
-            }
+            docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:$BUILD_NUMBER
+            '''
         }
+    }
+}
+stage('Deploy to Azure') {
+    steps {
+        withCredentials([
+            string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
+            string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
+            string(credentialsId: 'AZURE_TENANT_ID', variable: 'TENANT_ID')
+        ]) {
+            sh '''
+            az login --service-principal \
+              -u $CLIENT_ID \
+              -p $CLIENT_SECRET \
+              --tenant $TENANT_ID
+
+            az containerapp update \
+              --name $CONTAINER_APP \
+              --resource-group $RESOURCE_GROUP \
+              --image $ACR_NAME.azurecr.io/$IMAGE_NAME:$BUILD_NUMBER
+            '''
+        }
+    }
+}
     }
 }
