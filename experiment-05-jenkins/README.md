@@ -1,28 +1,23 @@
 # 🚀 End-to-End CI/CD Pipeline with Jenkins (Dockerized) + Azure Container Apps
 
+---
+
 ## 📌 Project Overview
 
-This project demonstrates a **complete CI/CD pipeline** setup using:
+This project demonstrates a **complete CI/CD pipeline** using:
 
-* **Jenkins (Dockerized)**
-* **Docker**
-* **Azure Container Registry (ACR)**
-* **Azure Container Apps**
-* **GitHub Webhooks (Auto Trigger)**
-
-The pipeline automates:
-
-1. Building a Maven-based backend application
-2. Creating a Docker image
-3. Pushing the image to ACR
-4. Deploying the application to Azure Container Apps
+* Jenkins (Dockerized)
+* Docker
+* Azure Container Registry (ACR)
+* Azure Container Apps
+* GitHub Webhooks (Auto Trigger)
 
 ---
 
-# 🏗️ Architecture
+## 🏗️ Architecture
 
 ```
-GitHub → Jenkins (Docker) → Build → Docker → ACR → Azure Container Apps
+GitHub → Jenkins (Docker) → Maven Build → Docker Build → ACR → Azure Container Apps
 ```
 
 ---
@@ -36,7 +31,6 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# Install dependencies + Docker + Maven
 RUN apt-get update && \
     apt-get install -y \
     curl \
@@ -48,14 +42,11 @@ RUN apt-get update && \
     maven && \
     apt-get clean
 
-# Install Azure CLI
+# Azure CLI
 RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ jammy main" > /etc/apt/sources.list.d/azure-cli.list && \
     apt-get update && \
     apt-get install -y azure-cli
-
-# Give Jenkins access to Docker
-RUN usermod -aG docker jenkins
 
 USER jenkins
 ```
@@ -70,7 +61,7 @@ docker build -t jenkins-azure-docker .
 
 ---
 
-## ▶️ Run Jenkins Container
+## ▶️ Run Jenkins Container (IMPORTANT)
 
 ```bash
 docker run -d \
@@ -97,6 +88,75 @@ docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 http://<VM-IP>:8080
 ```
+
+---
+
+# 🛠️ Fix: Docker Permission Issue (CRITICAL)
+
+## ❌ Error
+
+```
+permission denied while trying to connect to the Docker daemon socket
+```
+
+---
+
+## ✅ Step 1: Check Docker Group on Host
+
+```bash
+getent group docker
+```
+
+Example:
+
+```
+docker:x:114:jenkins,azureuser
+```
+
+👉 Note the GID (e.g., `114`)
+
+---
+
+## ✅ Step 2: Fix Inside Jenkins Container
+
+```bash
+docker exec -u root -it jenkins bash
+```
+
+```bash
+groupmod -g 114 docker
+usermod -aG docker jenkins
+exit
+```
+
+---
+
+## ✅ Step 3: Restart Jenkins
+
+```bash
+docker restart jenkins
+```
+
+---
+
+## ✅ Step 4: Verify
+
+```bash
+docker exec -it jenkins id
+```
+
+Expected:
+
+```
+groups=1000(jenkins),114(docker)
+```
+
+---
+
+## 🎯 Result
+
+* ✅ Docker build works
+* ✅ No permission errors
 
 ---
 
@@ -181,40 +241,6 @@ pipeline {
 
 ---
 
-# 📦 Docker Commands (Important)
-
-## 🔨 Build Docker Image
-
-```bash
-docker build -t jenkinspractice.azurecr.io/backend-app:v1 .
-```
-
----
-
-## 🔐 Login to ACR
-
-```bash
-az acr login --name jenkinspractice
-```
-
----
-
-## 📤 Push Image to ACR
-
-```bash
-docker push jenkinspractice.azurecr.io/backend-app:v1
-```
-
----
-
-## 📥 Pull Image from ACR
-
-```bash
-docker pull jenkinspractice.azurecr.io/backend-app:v1
-```
-
----
-
 # 🔐 Azure Service Principal Setup
 
 ```bash
@@ -226,61 +252,120 @@ az ad sp create-for-rbac \
 
 ---
 
-# 🔑 Jenkins Credentials
+# 🔐 Fix: ACR Push Permission (IMPORTANT)
 
-Add in Jenkins:
+## ❌ Default Role
 
-| Credential ID       | Type        | Value    |
-| ------------------- | ----------- | -------- |
-| AZURE_CLIENT_ID     | Secret Text | appId    |
-| AZURE_CLIENT_SECRET | Secret Text | password |
-| AZURE_TENANT_ID     | Secret Text | tenant   |
+```
+AcrPull (only pull allowed)
+```
 
 ---
 
-# 🔄 Auto Trigger (Webhook)
+## ✅ Grant Push Permission
 
-## 📌 GitHub Webhook URL
+```bash
+az role assignment create \
+  --assignee <CLIENT_ID> \
+  --role AcrPush \
+  --scope /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG>/providers/Microsoft.ContainerRegistry/registries/<ACR_NAME>
+```
+
+---
+
+## ✅ Verify
+
+```bash
+az role assignment list --assignee <CLIENT_ID> --output table
+```
+
+Expected:
+
+```
+AcrPush
+```
+
+---
+
+# 📦 Docker Commands
+
+## Build Image
+
+```bash
+docker build -t jenkinspractice.azurecr.io/backend-app:v1 .
+```
+
+## Login to ACR
+
+```bash
+az acr login --name jenkinspractice
+```
+
+## Push Image
+
+```bash
+docker push jenkinspractice.azurecr.io/backend-app:v1
+```
+
+## Pull Image
+
+```bash
+docker pull jenkinspractice.azurecr.io/backend-app:v1
+```
+
+---
+
+# 🔑 Jenkins Credentials
+
+| Credential ID       | Type        |
+| ------------------- | ----------- |
+| AZURE_CLIENT_ID     | Secret Text |
+| AZURE_CLIENT_SECRET | Secret Text |
+| AZURE_TENANT_ID     | Secret Text |
+
+---
+
+# 🔄 GitHub Webhook
+
+## URL
 
 ```
 http://<VM-IP>:8080/github-webhook/
 ```
 
-## Enable in Jenkins:
+## Enable
 
-* ✔ GitHub hook trigger for GITScm polling
+* GitHub hook trigger for GITScm polling
 
 ---
 
 # 🎯 Features
 
+* ✅ Fully automated CI/CD pipeline
 * ✅ Dockerized Jenkins setup
-* ✅ Automated CI/CD pipeline
-* ✅ Azure Container Apps deployment
-* ✅ Secure authentication using Service Principal
-* ✅ GitHub webhook auto-trigger
+* ✅ Secure Azure authentication
+* ✅ ACR integration
+* ✅ Auto deployment to Azure Container Apps
 
 ---
 
 # 🚀 Outcome
 
-* Fully automated deployment pipeline
-* Zero manual intervention after code push
-* Production-like DevOps workflow
+* Zero manual deployment
+* End-to-end automation
+* Production-ready DevOps workflow
 
 ---
 
 # 💡 Future Improvements
 
-* Multi-environment deployment (Dev/Stage/Prod)
-* Helm / Kubernetes integration
-* Monitoring & logging
+* Multi-environment (Dev/Stage/Prod)
+* Kubernetes (AKS) deployment
+* Monitoring & logging (Prometheus/Grafana)
 * Rollback strategy
 
 ---
 
 # 🙌 Author
 
-**Alpha (DevOps Engineer 🚀)**
-
----
+**DevOps Engineer 🚀**
