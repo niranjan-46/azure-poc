@@ -48,6 +48,12 @@ stages:
         javaHomeOption: 'JDKVersion'
         jdkVersionOption: '1.17'
 
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Maven Build Artifact'
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/$(workingDir)/target'
+        artifact: 'maven-target'
+
 # ================= DOCKER =================
 - stage: BuildAndPushDocker
   displayName: 'Build and Push Docker Image'
@@ -58,6 +64,12 @@ stages:
     pool:
       name: 'Default'
     steps:
+
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Maven Build Artifact'
+      inputs:
+        artifact: 'maven-target'
+        targetPath: '$(Build.SourcesDirectory)/$(workingDir)/target'
 
     # ✅ Login to Azure
     - task: AzureCLI@2
@@ -71,7 +83,8 @@ stages:
 
     # ✅ Build Docker image
     - script: |
-        docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) $(workingDir)
+        cd $(workingDir)
+        docker build -t $(registryName).azurecr.io/$(repositoryName):$(tag) .
       displayName: 'Build Docker Image'
 
     # ✅ Push Docker image
